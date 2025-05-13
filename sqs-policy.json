@@ -1,0 +1,18 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "1",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::586794481435:user/wmdy0000-s"
+            },
+            "Action": [
+                "sns:Subscribe"
+            ],
+            "Resource": [
+                "arn:aws:sns:eu-north-1:844075064641:profiles_topic"
+            ]
+        }
+    ]
+}
