@@ -20,29 +20,37 @@ CREATE OR REPLACE STAGE PROFILES_VAULT.BRONZE.MY_S3_STAGE
     FILE_FORMAT = (TYPE = 'JSON');
 */
 
+-- Check copy history
+SELECT *
+FROM TABLE(INFORMATION_SCHEMA.COPY_HISTORY(
+  table_name => 'customer_details_json_stage',
+  start_time => DATEADD(hour, -1, CURRENT_TIMESTAMP())
+))
+ORDER BY LAST_LOAD_TIME DESC;
+
 -- Create bronze table
-CREATE OR REPLACE TABLE PROFILES_VAULT.BRONZE.customer_details(
-    id STRING,
-    first_name STRING,
-    last_name STRING,
-    gender STRING,
-    country STRING,
-    address STRING,
-    post_code STRING,
-    latitude STRING,
-    longitude STRING,
-    timezone STRING,
-    email STRING,
-    username STRING,
-    id_name STRING,
-    id_value STRING,
-    dob STRING,
-    age INT,
-    registered_date STRING,
-    phone STRING,
-    picture STRING,
-    nationality STRING
-);
+-- CREATE OR REPLACE TABLE PROFILES_VAULT.BRONZE.customer_details(
+--     id STRING,
+--     first_name STRING,
+--     last_name STRING,
+--     gender STRING,
+--     country STRING,
+--     address STRING,
+--     post_code STRING,
+--     latitude STRING,
+--     longitude STRING,
+--     timezone STRING,
+--     email STRING,
+--     username STRING,
+--     id_name STRING,
+--     id_value STRING,
+--     dob STRING,
+--     age INT,
+--     registered_date STRING,
+--     phone STRING,
+--     picture STRING,
+--     nationality STRING
+-- );
 
 -- Data Manipulation Language
 CREATE OR REPLACE PROCEDURE PROFILES_VAULT.BRONZE.br_load_customer_details()
@@ -73,7 +81,10 @@ BEGIN
         raw:phone::STRING AS phone,
         raw:picture::STRING AS picture,
         raw:nationality::STRING AS nationality
-    FROM PROFILES_VAULT.BRONZE.customer_details_json_stage;
+    FROM PROFILES_VAULT.BRONZE.customer_details_json_stage
+    WHERE raw:id::STRING NOT IN (
+    SELECT id FROM PROFILES_VAULT.BRONZE.customer_details
+    );
 
     COMMIT;
     RETURN 'Bronze Layer Insert completed successfully.';

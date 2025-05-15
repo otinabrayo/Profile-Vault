@@ -1,8 +1,8 @@
 from airflow import DAG
 from airflow.utils.email import send_email
 from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
+from airflow.providers.common.sql.sensors.sql import SqlSensor
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
 import os
 
@@ -59,18 +59,28 @@ load_gold_table = SnowflakeOperator(
     dag=dag
 )
 
-# load_corrupted_data = SnowflakeOperator(
-#     task_id='crypto_corrupted_data_making',
-#     sql='./sqls/corrupted_data.sql',
-#     snowflake_conn_id='snowflake_conn_id',
-#     dag=dag
-# )
+wait_for_ingestion = SqlSensor(
+    task_id='wait_for_ingestion_completion',
+    conn_id='admin',
+    sql="""
+        SELECT COUNT(*)
+        FROM PROFILES_VAULT.BRONZE.customer_details_json_stage
+        WHERE raw:id::STRING NOT IN (
+        SELECT id FROM PROFILES_VAULT.BRONZE.customer_details
+    );
+    """,
+    success=lambda x: x > 0,  # Only proceed if count > 0
+    poke_interval=60,
+    timeout=600,
+    mode='reschedule',
+    dag=dag
+)
 
-# trigger_final_table_to_mail = TriggerDagRunOperator(
-#     task_id='trigger_final_table_dag',
-#     trigger_dag_id='gold_crypto_layer',
-#     wait_for_completion=False,
-#     dag=dag
-# )
+trigger_final_table_to_mail = TriggerDagRunOperator(
+    task_id='trigger_final_table_dag',
+    trigger_dag_id='profiles_csv_to_mail',
+    wait_for_completion=False,
+    dag=dag
+)
 
-load_bronze_table >> load_silver_table >> load_gold_table
+wait_for_ingestion >> load_bronze_table >> load_silver_table >> load_gold_table >> trigger_final_table_to_mail

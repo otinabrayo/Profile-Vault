@@ -3,28 +3,29 @@
 -- CREATE SCHEMA IF NOT EXISTS PROFILES_VAULT.silver;
 
 -- Create SILVER table
-CREATE OR REPLACE TABLE PROFILES_VAULT.SILVER.customer_details(
-    id STRING,
-    first_name STRING,
-    last_name STRING,
-    gender STRING,
-    country STRING,
-    address STRING,
-    post_code STRING,
-    latitude FLOAT,
-    longitude FLOAT,
-    timezone STRING,
-    email STRING,
-    username STRING,
-    id_name STRING,
-    id_value STRING,
-    dob STRING,
-    age INT,
-    registered_date STRING,
-    phone STRING,
-    picture STRING,
-    nationality STRING
-);
+-- TRUNCATE TABLE PROFILES_VAULT.SILVER.customer_details;
+-- CREATE OR REPLACE TABLE PROFILES_VAULT.SILVER.customer_details(
+--     id STRING,
+--     first_name STRING,
+--     last_name STRING,
+--     gender STRING,
+--     country STRING,
+--     address STRING,
+--     post_code STRING,
+--     latitude FLOAT,
+--     longitude FLOAT,
+--     timezone STRING,
+--     email STRING,
+--     username STRING,
+--     id_name STRING,
+--     id_value STRING,
+--     dob STRING,
+--     age INT,
+--     registered_date STRING,
+--     phone STRING,
+--     picture STRING,
+--     nationality STRING
+-- );
 
 -- Data Manipulation Language
 CREATE OR REPLACE PROCEDURE PROFILES_VAULT.SILVER.sl_load_customer_details()
@@ -52,10 +53,13 @@ BEGIN
         REPLACE(email, 'example.com', 'yahoo.com') AS email,
         username,
         CASE
-            WHEN id_name = '' THEN null
+            WHEN id_name = '' THEN 'NULL'
             ELSE id_name
         END AS id_name,
-        id_value,
+        CASE
+            WHEN id_value = null THEN 'NULL'
+            ELSE id_value
+        END AS id_value,
         TO_CHAR(CAST(dob AS TIMESTAMP_TZ), 'YYYY-MM-DD HH24:MI')AS dob,
         age,
         TO_CHAR(CAST(registered_date AS TIMESTAMP_TZ), 'YYYY-MM-DD HH24:MI')AS registered_date,
@@ -65,7 +69,10 @@ BEGIN
         END AS phone_number,
         picture,
         nationality
-    FROM PROFILES_VAULT.BRONZE.customer_details;
+    FROM PROFILES_VAULT.BRONZE.customer_details
+    WHERE SUBSTR(id, 1, 5) NOT IN (
+    SELECT id FROM PROFILES_VAULT.silver.customer_details
+    );
 
     COMMIT;
     RETURN 'SILVER Layer Insert completed successfully.';
