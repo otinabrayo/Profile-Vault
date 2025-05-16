@@ -1,31 +1,34 @@
 -- Data Definition Language
+-- Commented code is only needed once to create the table and staging table
 
--- CREATE SCHEMA IF NOT EXISTS PROFILES_VAULT.gold;
+/*
+CREATE SCHEMA IF NOT EXISTS PROFILES_VAULT.gold;
 
--- Create GOLD table
--- CREATE OR REPLACE TABLE PROFILES_VAULT.GOLD.customer_details(
---     customer_tracker INT,
---     id STRING,
---     first_name STRING,
---     last_name STRING,
---     gender STRING,
---     country STRING,
---     address STRING,
---     post_code STRING,
---     latitude FLOAT,
---     longitude FLOAT,
---     timezone STRING,
---     email STRING,
---     username STRING,
---     id_name STRING,
---     id_value STRING,
---     dob STRING,
---     age INT,
---     registered_date STRING,
---     phone STRING,
---     picture STRING,
---     nationality STRING
--- );
+Create GOLD table
+CREATE OR REPLACE TABLE PROFILES_VAULT.GOLD.customer_details(
+    customer_tracker INT,
+    id STRING,
+    first_name STRING,
+    last_name STRING,
+    gender STRING,
+    country STRING,
+    address STRING,
+    post_code STRING,
+    latitude FLOAT,
+    longitude FLOAT,
+    timezone STRING,
+    email STRING,
+    username STRING,
+    id_name STRING,
+    id_value STRING,
+    dob STRING,
+    age INT,
+    registered_date STRING,
+    phone STRING,
+    picture STRING,
+    nationality STRING
+);
+*/
 
 -- Data Manipulation Language
 CREATE OR REPLACE PROCEDURE PROFILES_VAULT.GOLD.gl_load_customer_details()

@@ -1,11 +1,8 @@
 # Generate a secure random hex string (e.g., 32 bytes = 64 hex chars)
 python -c "import secrets; print(secrets.token_hex(32))"
 
-247778879c7813e557ca1218271e565d231ebce13fc847066b36226692ecd92e
 # Generate a Fernet key
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-
-S_gUMMSrI_k-V1HbJeUDIWs2fB8MhmG89dNlEKWPmp4=
 
 docker exec -it profiles_vault-kafka-1 bash
 
